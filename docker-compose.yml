@@ -11,7 +11,10 @@ services:
       - "9200:9200"
       - "9300:9300"
     environment:
-      ES_JAVA_OPTS: "-Xmx256m -Xms256m"
+      # - ES_JAVA_OPTS="-Xmx256m -Xms256m"
+      - http.host=0.0.0.0
+      - transport.host=127.0.0.1
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
     networks:
       - elk
 
@@ -19,12 +22,12 @@ services:
     build:
       context: logstash/
     volumes:
-      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
-      - ./logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:rw
+      - ./logstash/pipeline:/usr/share/logstash/pipeline:rw
     ports:
       - "5000:5000"
     environment:
-      LS_JAVA_OPTS: "-Xmx256m -Xms256m"
+      - 'xpack.monitoring.elasticsearch.password=${ELASTIC_PASSWORD}'
     networks:
       - elk
     depends_on:
@@ -41,6 +44,9 @@ services:
       - elk
     depends_on:
       - elasticsearch
+    environment:
+      - ELASTICSEARCH_USERNAME=kibana
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD}
 
 networks:
 
